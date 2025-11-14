@@ -45,18 +45,25 @@ export default function App() {
   }, [filteredCategories])
 
   async function loadCategories() {
-    const res = await fetch(`${API}/categories`)
-    const data = await res.json()
-    setCategories(data)
+    try {
+      const res = await fetch(`${API}/categories`)
+      const data = await res.json()
+      const list = Array.isArray(data) ? data : []
+      setCategories(list)
+    } catch (e) {
+      console.error('loadCategories', e)
+      setCategories([])
+    }
   }
 
   async function loadTransactions() {
     try {
       const res = await fetch(`${API}/transactions`)
       const data = await res.json()
-      setTransactions(data)
+      setTransactions(Array.isArray(data) ? data : [])
     } catch (e) {
       console.error('loadTransactions', e)
+      setTransactions([])
     }
   }
 
@@ -64,21 +71,24 @@ export default function App() {
     try {
       const res = await fetch(`${API}/analytics`)
       const data = await res.json()
-      setSummary(data.summary || { total_income: 0, total_expenses: 0 })
-      // Chart is handled by the CDN script; optional to implement
-      if (window.Chart && data.byCategory) {
+      const safeSummary = data && data.summary ? data.summary : { total_income: 0, total_expenses: 0, transaction_count: 0 }
+      const byCategory = Array.isArray(data && data.byCategory) ? data.byCategory : []
+      setSummary(safeSummary)
+      // Chart (optional)
+      if (window.Chart) {
         const el = document.getElementById('categoryChart')
-        if (el) {
-          if (window.__chart) {
-            window.__chart.destroy()
-          }
+        if (window.__chart) {
+          try { window.__chart.destroy() } catch { /* ignore */ }
+          window.__chart = null
+        }
+        if (el && byCategory.length > 0) {
           window.__chart = new window.Chart(el, {
             type: 'doughnut',
             data: {
-              labels: data.byCategory.map(c => c.name),
+              labels: byCategory.map(c => c.name || ''),
               datasets: [{
-                data: data.byCategory.map(c => c.total),
-                backgroundColor: data.byCategory.map(c => c.color)
+                data: byCategory.map(c => Number(c.total || 0)),
+                backgroundColor: byCategory.map(c => c.color || '#667eea')
               }]
             },
             options: {
@@ -91,6 +101,11 @@ export default function App() {
       }
     } catch (e) {
       console.error('loadAnalytics', e)
+      setSummary({ total_income: 0, total_expenses: 0, transaction_count: 0 })
+      if (window.__chart) {
+        try { window.__chart.destroy() } catch { /* ignore */ }
+        window.__chart = null
+      }
     }
   }
 
@@ -241,5 +256,6 @@ const inputStyle = {
   width: '100%', padding: 10, border: '2px solid #e0e0e0', borderRadius: 6, fontSize: 14, transition: 'border 0.3s'
 }
 const buttonStyle = { background: '#667eea', color: 'white', padding: '12px 24px', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 16, width: '100%' }
+
 
 

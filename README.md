@@ -32,3 +32,5 @@ Use `minikube service -n finance finance-frontend --url` to open the UI.
 That’s it — simple, boring, and it works. 
 
 
+
+

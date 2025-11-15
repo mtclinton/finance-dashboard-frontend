@@ -10,6 +10,7 @@ export default function App() {
   const [categories, setCategories] = useState([])
   const [transactions, setTransactions] = useState([])
   const [summary, setSummary] = useState({ total_income: 0, total_expenses: 0 })
+  const [loadingUI, setLoadingUI] = useState(true)
   const [type, setType] = useState('expense')
   const [form, setForm] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -27,9 +28,9 @@ export default function App() {
   )
 
   useEffect(() => {
-    loadCategories()
-    loadTransactions()
-    loadAnalytics()
+    Promise.all([loadCategories(), loadTransactions(), loadAnalytics()]).finally(() =>
+      setTimeout(() => setLoadingUI(false), 300)
+    )
     const id = setInterval(() => {
       loadTransactions()
       loadAnalytics()
@@ -150,25 +151,54 @@ export default function App() {
   const net = (Number(summary.total_income || 0) - Number(summary.total_expenses || 0))
 
   return (
-    <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", background: '#f5f7fa', minHeight: '100vh' }}>
-      <div style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', padding: 30, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
-        <h1 style={{ fontSize: '2em', marginBottom: 5 }}>💰 Personal Finance Dashboard</h1>
-        <p style={{ opacity: 0.9 }}>Track expenses, manage budgets, achieve financial goals</p>
+    <div style={pageStyle}>
+      <div style={headerWrap}>
+        <div style={headerBackdrop} />
+        <div style={headerContent}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={logoBadge}>💰</span>
+            <h1 style={headerTitle}>Personal Finance Dashboard</h1>
+          </div>
+          <p style={headerSubtitle}>Track expenses, manage budgets, and visualize your progress</p>
+          <div style={headerChips}>
+            <span style={chip}>Live</span>
+            <span style={chipSecondary}>Auto-refresh 30s</span>
+          </div>
+        </div>
       </div>
 
-      <div style={{ maxWidth: 1400, margin: '0 auto', padding: 30 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, marginBottom: 30 }}>
-          <div className="card" style={cardStyle}>
-            <h2 style={h2Style}>📊 This Month</h2>
-            <div className="stat-label" style={labelStyle}>Total Income</div>
-            <div className="stat positive" style={{ ...statStyle, color: '#27ae60' }}>{formatCurrency(summary.total_income)}</div>
-            <div className="stat-label" style={labelStyle}>Total Expenses</div>
-            <div className="stat negative" style={{ ...statStyle, color: '#e74c3c' }}>{formatCurrency(summary.total_expenses)}</div>
-            <div className="stat-label" style={labelStyle}>Net Savings</div>
-            <div className="stat" style={{ ...statStyle, color: '#667eea' }}>{formatCurrency(net)}</div>
+      <div style={container}>
+        <div style={grid3}>
+          <div style={metricCard}>
+            <div style={metricHeader}>
+              <span style={metricIcon}>📈</span>
+              <h2 style={metricTitle}>Total Income</h2>
+            </div>
+            <div style={{ ...metricValue, color: '#27ae60' }}>{formatCurrency(summary.total_income)}</div>
+            <div style={metricFooter}>Last 30 days</div>
           </div>
 
-          <div className="card" style={cardStyle}>
+          <div style={metricCard}>
+            <div style={metricHeader}>
+              <span style={metricIcon}>💸</span>
+              <h2 style={metricTitle}>Total Expenses</h2>
+            </div>
+            <div style={{ ...metricValue, color: '#e74c3c' }}>{formatCurrency(summary.total_expenses)}</div>
+            <div style={metricFooter}>Last 30 days</div>
+          </div>
+
+          <div style={metricCard}>
+            <div style={metricHeader}>
+              <span style={metricIcon}>💼</span>
+              <h2 style={metricTitle}>Net Savings</h2>
+            </div>
+            <div style={{ ...metricValue, color: '#667eea' }}>{formatCurrency(net)}</div>
+            <div style={metricFooter}>{net >= 0 ? 'On track' : 'Over budget'}</div>
+          </div>
+        </div>
+
+        <div style={grid2}>
+          <div style={cardStyle}>
             <h2 style={h2Style}>➕ Add Transaction</h2>
             <div className="form-group" style={fgStyle}>
               <label style={labelField}>Date</label>
@@ -195,32 +225,42 @@ export default function App() {
                 {filteredCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
-            <button onClick={addTransaction} disabled={loading} style={buttonStyle}>{loading ? 'Adding...' : 'Add Transaction'}</button>
+            <button onClick={addTransaction} disabled={loading} style={buttonStyle}>
+              {loading ? 'Adding...' : 'Add Transaction'}
+            </button>
           </div>
 
-          <div className="card" style={cardStyle}>
+          <div style={cardStyle}>
             <h2 style={h2Style}>📈 Spending by Category</h2>
-            <div className="chart-container" style={{ position: 'relative', height: 300 }}>
+            <div className="chart-container" style={chartWrap}>
               <canvas id="categoryChart"></canvas>
+              {loadingUI && <div style={skeleton} />}
             </div>
           </div>
         </div>
 
-        <div className="card" style={cardStyle}>
+        <div style={cardStyle}>
           <h2 style={h2Style}>📋 Recent Transactions</h2>
-          <div className="transaction-list" style={{ maxHeight: 500, overflowY: 'auto' }}>
+          <div className="transaction-list" style={listWrap}>
             {transactions.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>No transactions yet. Add your first one!</div>
+              <div style={emptyState}>No transactions yet. Add your first one!</div>
             ) : transactions.map(t => (
               <div key={t.id} className={`transaction ${t.type}`} style={{
-                background: '#f8f9fa', padding: 15, marginBottom: 10, borderRadius: 8,
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.85))',
+                padding: 16, marginBottom: 12, borderRadius: 12,
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                borderLeft: `4px solid ${t.type === 'income' ? '#27ae60' : '#e74c3c'}`
+                borderLeft: `5px solid ${t.type === 'income' ? '#27ae60' : '#e74c3c'}`,
+                boxShadow: '0 6px 20px rgba(0,0,0,0.06)',
+                backdropFilter: 'blur(6px)'
               }}>
                 <div className="transaction-info" style={{ flex: 1 }}>
-                  <div className="transaction-desc" style={{ fontWeight: 600, marginBottom: 5 }}>{t.description}</div>
+                  <div className="transaction-desc" style={{ fontWeight: 700, marginBottom: 6, color: '#2c2c2c' }}>{t.description}</div>
                   <div className="transaction-meta" style={{ fontSize: '0.85em', color: '#666' }}>
-                    <span style={{ background: t.category_color, color: 'white', padding: '2px 8px', borderRadius: 4, fontSize: '0.8em', marginRight: 8 }}>
+                    <span style={{
+                      background: t.category_color || '#667eea',
+                      color: 'white', padding: '3px 10px', borderRadius: 999, fontSize: '0.75em', marginRight: 8,
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
+                    }}>
                       {t.category_name}
                     </span>
                     {new Date(t.date).toLocaleDateString()}
@@ -241,21 +281,67 @@ export default function App() {
   )
 }
 
-const cardStyle = {
-  background: 'white',
-  padding: 25,
-  borderRadius: 12,
-  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+const pageStyle = {
+  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  minHeight: '100vh',
+  background: 'radial-gradient(1200px 400px at -10% -20%, #e8ecff 0%, rgba(232,236,255,0) 60%), radial-gradient(1200px 400px at 110% 120%, #ffe7f6 0%, rgba(255,231,246,0) 60%), #f6f7fb'
 }
-const h2Style = { fontSize: '1.2em', color: '#333', marginBottom: 15, display: 'flex', alignItems: 'center', gap: 10 }
-const statStyle = { fontSize: '2.2em', fontWeight: 'bold', margin: '10px 0' }
-const labelStyle = { color: '#666', fontSize: '0.9em', textTransform: 'uppercase', letterSpacing: 1 }
+
+const headerWrap = { position: 'relative', overflow: 'hidden', padding: '48px 24px' }
+const headerBackdrop = {
+  position: 'absolute', inset: 0,
+  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+}
+const headerContent = { position: 'relative', maxWidth: 1400, margin: '0 auto', color: 'white' }
+const logoBadge = {
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+  width: 44, height: 44, borderRadius: 12, background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(6px)', fontSize: 22
+}
+const headerTitle = { fontSize: '2.2em', fontWeight: 800, letterSpacing: 0.3, margin: 0 }
+const headerSubtitle = { marginTop: 8, opacity: 0.9 }
+const headerChips = { marginTop: 16, display: 'flex', gap: 10 }
+const chip = { background: 'rgba(255,255,255,0.25)', border: '1px solid rgba(255,255,255,0.4)', padding: '6px 12px', borderRadius: 999, fontSize: 12 }
+const chipSecondary = { ...chip, background: 'rgba(255,255,255,0.15)' }
+
+const container = { maxWidth: 1400, margin: '0 auto', padding: 24 }
+const grid3 = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20, marginBottom: 24 }
+const grid2 = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }
+const metricCard = {
+  background: 'linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.85))',
+  padding: 22, borderRadius: 14, boxShadow: '0 12px 30px rgba(0,0,0,0.06)', backdropFilter: 'blur(8px)',
+  border: '1px solid rgba(102,126,234,0.15)'
+}
+const metricHeader = { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }
+const metricIcon = { fontSize: 18 }
+const metricTitle = { fontSize: '1.05em', color: '#333', margin: 0, fontWeight: 700, letterSpacing: 0.2 }
+const metricValue = { fontSize: '2.1em', fontWeight: 800, marginTop: 6 }
+const metricFooter = { marginTop: 6, fontSize: 12, color: '#777' }
+
+const cardStyle = {
+  background: 'linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9))',
+  padding: 25, borderRadius: 14, boxShadow: '0 12px 30px rgba(0,0,0,0.06)',
+  border: '1px solid rgba(0,0,0,0.06)', backdropFilter: 'blur(8px)'
+}
+const h2Style = { fontSize: '1.1em', color: '#333', marginBottom: 15, display: 'flex', alignItems: 'center', gap: 10, fontWeight: 800, letterSpacing: 0.3 }
 const fgStyle = { marginBottom: 15 }
 const labelField = { display: 'block', marginBottom: 5, color: '#555', fontWeight: 500 }
 const inputStyle = {
-  width: '100%', padding: 10, border: '2px solid #e0e0e0', borderRadius: 6, fontSize: 14, transition: 'border 0.3s'
+  width: '100%', padding: 12, border: '2px solid #e0e0e0', borderRadius: 10, fontSize: 14, transition: 'border 0.25s, transform 0.1s',
+  background: '#fff'
 }
-const buttonStyle = { background: '#667eea', color: 'white', padding: '12px 24px', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 16, width: '100%' }
+const buttonStyle = {
+  background: 'linear-gradient(135deg, #667eea, #764ba2)', color: 'white',
+  padding: '12px 24px', border: 'none', borderRadius: 12, cursor: 'pointer',
+  fontSize: 16, width: '100%', boxShadow: '0 10px 20px rgba(102,126,234,0.25)', transition: 'transform 0.1s ease'
+}
+const chartWrap = { position: 'relative', height: 300, overflow: 'hidden', borderRadius: 12 }
+const skeleton = {
+  position: 'absolute', inset: 0, background:
+    'linear-gradient(90deg, rgba(240,240,240,0.6) 0%, rgba(255,255,255,0.9) 50%, rgba(240,240,240,0.6) 100%)',
+  animation: 'pulse 1.2s ease-in-out infinite'
+}
+const listWrap = { maxHeight: 500, overflowY: 'auto', paddingRight: 4 }
+const emptyState = { textAlign: 'center', padding: 40, color: '#999' }
 
 
 

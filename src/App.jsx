@@ -12,6 +12,14 @@ export default function App() {
   const [summary, setSummary] = useState({ total_income: 0, total_expenses: 0 })
   const [loadingUI, setLoadingUI] = useState(true)
   const [type, setType] = useState('expense')
+  const [darkMode, setDarkMode] = useState(() => {
+    try {
+      const saved = localStorage.getItem('fd_theme')
+      if (saved === 'dark') return true
+      if (saved === 'light') return false
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+    } catch { return false }
+  })
   const [form, setForm] = useState({
     date: new Date().toISOString().split('T')[0],
     description: '',
@@ -150,8 +158,12 @@ export default function App() {
 
   const net = (Number(summary.total_income || 0) - Number(summary.total_expenses || 0))
 
+  useEffect(() => {
+    try { localStorage.setItem('fd_theme', darkMode ? 'dark' : 'light') } catch {}
+  }, [darkMode])
+
   return (
-    <div style={pageStyle}>
+    <div style={{ ...pageStyle, background: darkMode ? '#0f1220' : pageStyle.background, color: darkMode ? '#e5e7eb' : '#111827' }}>
       <div style={headerWrap}>
         <div style={headerBackdrop} />
         <div style={headerContent}>
@@ -164,12 +176,28 @@ export default function App() {
             <span style={chip}>Live</span>
             <span style={chipSecondary}>Auto-refresh 30s</span>
           </div>
+          <div style={{ position: 'absolute', right: 24, top: 24 }}>
+            <button
+              onClick={() => setDarkMode(d => !d)}
+              style={{
+                background: 'rgba(255,255,255,0.2)',
+                color: 'white',
+                padding: '8px 12px',
+                border: '1px solid rgba(255,255,255,0.4)',
+                borderRadius: 8,
+                cursor: 'pointer'
+              }}
+              aria-label="Toggle dark mode"
+            >
+              {darkMode ? '☀️ Light' : '🌙 Dark'}
+            </button>
+          </div>
         </div>
       </div>
 
       <div style={container}>
         <div style={grid3}>
-          <div style={metricCard}>
+          <div style={{ ...metricCard, background: darkMode ? 'linear-gradient(180deg, rgba(29,36,66,0.85), rgba(29,36,66,0.75))' : metricCard.background, border: darkMode ? '1px solid rgba(255,255,255,0.06)' : metricCard.border }}>
             <div style={metricHeader}>
               <span style={metricIcon}>📈</span>
               <h2 style={metricTitle}>Total Income</h2>
@@ -178,7 +206,7 @@ export default function App() {
             <div style={metricFooter}>Last 30 days</div>
           </div>
 
-          <div style={metricCard}>
+          <div style={{ ...metricCard, background: darkMode ? 'linear-gradient(180deg, rgba(29,36,66,0.85), rgba(29,36,66,0.75))' : metricCard.background, border: darkMode ? '1px solid rgba(255,255,255,0.06)' : metricCard.border }}>
             <div style={metricHeader}>
               <span style={metricIcon}>💸</span>
               <h2 style={metricTitle}>Total Expenses</h2>
@@ -187,7 +215,7 @@ export default function App() {
             <div style={metricFooter}>Last 30 days</div>
           </div>
 
-          <div style={metricCard}>
+          <div style={{ ...metricCard, background: darkMode ? 'linear-gradient(180deg, rgba(29,36,66,0.85), rgba(29,36,66,0.75))' : metricCard.background, border: darkMode ? '1px solid rgba(255,255,255,0.06)' : metricCard.border }}>
             <div style={metricHeader}>
               <span style={metricIcon}>💼</span>
               <h2 style={metricTitle}>Net Savings</h2>
@@ -198,39 +226,39 @@ export default function App() {
         </div>
 
         <div style={grid2}>
-          <div style={cardStyle}>
+          <div style={{ ...cardStyle, background: darkMode ? '#151a2e' : cardStyle.background, border: darkMode ? '1px solid #232a44' : cardStyle.border }}>
             <h2 style={h2Style}>➕ Add Transaction</h2>
             <div className="form-group" style={fgStyle}>
               <label style={labelField}>Date</label>
-              <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} style={inputStyle} />
+              <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} style={{ ...inputStyle, background: darkMode ? '#0f1429' : '#fff', borderColor: darkMode ? '#2b3358' : '#e0e0e0', color: darkMode ? '#e5e7eb' : '#111827' }} />
             </div>
             <div className="form-group" style={fgStyle}>
               <label style={labelField}>Description</label>
-              <input type="text" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="e.g., Grocery shopping" style={inputStyle} />
+              <input type="text" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="e.g., Grocery shopping" style={{ ...inputStyle, background: darkMode ? '#0f1429' : '#fff', borderColor: darkMode ? '#2b3358' : '#e0e0e0', color: darkMode ? '#e5e7eb' : '#111827' }} />
             </div>
             <div className="form-group" style={fgStyle}>
               <label style={labelField}>Amount</label>
-              <input type="number" step="0.01" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} placeholder="0.00" style={inputStyle} />
+              <input type="number" step="0.01" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} placeholder="0.00" style={{ ...inputStyle, background: darkMode ? '#0f1429' : '#fff', borderColor: darkMode ? '#2b3358' : '#e0e0e0', color: darkMode ? '#e5e7eb' : '#111827' }} />
             </div>
             <div className="form-group" style={fgStyle}>
               <label style={labelField}>Type</label>
-              <select value={form.type} onChange={e => { setType(e.target.value); setForm(f => ({ ...f, type: e.target.value })) }} style={inputStyle}>
+              <select value={form.type} onChange={e => { setType(e.target.value); setForm(f => ({ ...f, type: e.target.value })) }} style={{ ...inputStyle, background: darkMode ? '#0f1429' : '#fff', borderColor: darkMode ? '#2b3358' : '#e0e0e0', color: darkMode ? '#e5e7eb' : '#111827' }}>
                 <option value="expense">Expense</option>
                 <option value="income">Income</option>
               </select>
             </div>
             <div className="form-group" style={fgStyle}>
               <label style={labelField}>Category</label>
-              <select value={form.category_id} onChange={e => setForm(f => ({ ...f, category_id: e.target.value }))} style={inputStyle}>
+              <select value={form.category_id} onChange={e => setForm(f => ({ ...f, category_id: e.target.value }))} style={{ ...inputStyle, background: darkMode ? '#0f1429' : '#fff', borderColor: darkMode ? '#2b3358' : '#e0e0e0', color: darkMode ? '#e5e7eb' : '#111827' }}>
                 {filteredCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
-            <button onClick={addTransaction} disabled={loading} style={buttonStyle}>
+            <button onClick={addTransaction} disabled={loading} style={{ ...buttonStyle, background: darkMode ? 'linear-gradient(135deg, #4f46e5, #7c3aed)' : buttonStyle.background }}>
               {loading ? 'Adding...' : 'Add Transaction'}
             </button>
           </div>
 
-          <div style={cardStyle}>
+          <div style={{ ...cardStyle, background: darkMode ? '#151a2e' : cardStyle.background, border: darkMode ? '1px solid #232a44' : cardStyle.border }}>
             <h2 style={h2Style}>📈 Spending by Category</h2>
             <div className="chart-container" style={chartWrap}>
               <canvas id="categoryChart"></canvas>
@@ -239,7 +267,7 @@ export default function App() {
           </div>
         </div>
 
-        <div style={cardStyle}>
+        <div style={{ ...cardStyle, background: darkMode ? '#151a2e' : cardStyle.background, border: darkMode ? '1px solid #232a44' : cardStyle.border }}>
           <h2 style={h2Style}>📋 Recent Transactions</h2>
           <div className="transaction-list" style={listWrap}>
             {transactions.length === 0 ? (

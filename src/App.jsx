@@ -163,33 +163,48 @@ export default function App() {
   }, [darkMode])
 
   return (
-    <div style={{ ...pageStyle, background: darkMode ? '#0f1220' : pageStyle.background, color: darkMode ? '#e5e7eb' : '#111827' }}>
-      <div style={headerWrap}>
-        <div style={headerBackdrop} />
-        <div style={headerContent}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={logoBadge}>💰</span>
-            <h1 style={headerTitle}>Personal Finance Dashboard</h1>
+    <div style={{ ...pageStyle, background: darkMode ? '#0b1020' : '#f8fafc', color: darkMode ? '#e5e7eb' : '#0f172a', fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial" }}>
+      {/* Top navigation bar */}
+      <div style={{
+        background: darkMode ? '#0f172a' : '#ffffff',
+        borderBottom: `1px solid ${darkMode ? '#1f2937' : '#e5e7eb'}`,
+        padding: '14px 20px'
+      }}>
+        <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              width: 28, height: 28, borderRadius: 6,
+              background: darkMode ? '#1d2a4a' : '#eef2ff',
+              display: 'grid', placeItems: 'center', fontSize: 15
+            }}>₿</div>
+            <div>
+              <div style={{ fontWeight: 700, letterSpacing: 0.2, fontSize: 16 }}>Finance Dashboard</div>
+              <div style={{ fontSize: 12, opacity: 0.6 }}>Overview</div>
+            </div>
           </div>
-          <p style={headerSubtitle}>Track expenses, manage budgets, and visualize your progress</p>
-          <div style={headerChips}>
-            <span style={chip}>Live</span>
-            <span style={chipSecondary}>Auto-refresh 30s</span>
-          </div>
-          <div style={{ position: 'absolute', right: 24, top: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{
+              fontSize: 12,
+              border: `1px solid ${darkMode ? '#334155' : '#e5e7eb'}`,
+              padding: '4px 8px',
+              borderRadius: 999,
+              background: darkMode ? '#0b1220' : '#fff',
+              opacity: 0.8
+            }}>Auto-refresh 30s</span>
             <button
               onClick={() => setDarkMode(d => !d)}
               style={{
-                background: 'rgba(255,255,255,0.2)',
-                color: 'white',
+                background: darkMode ? '#111827' : '#0f172a',
+                color: '#ffffff',
                 padding: '8px 12px',
-                border: '1px solid rgba(255,255,255,0.4)',
+                border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: 8,
-                cursor: 'pointer'
+                cursor: 'pointer',
+                fontSize: 13
               }}
               aria-label="Toggle dark mode"
             >
-              {darkMode ? '☀️ Light' : '🌙 Dark'}
+              {darkMode ? 'Light' : 'Dark'}
             </button>
           </div>
         </div>
@@ -197,7 +212,11 @@ export default function App() {
 
       <div style={container}>
         <div style={grid3}>
-          <div style={{ ...metricCard, background: darkMode ? 'linear-gradient(180deg, rgba(29,36,66,0.85), rgba(29,36,66,0.75))' : metricCard.background, border: darkMode ? '1px solid rgba(255,255,255,0.06)' : metricCard.border }}>
+          <div style={{
+            ...metricCard,
+            background: darkMode ? '#0f172a' : '#ffffff',
+            border: `1px solid ${darkMode ? '#1f2937' : '#e5e7eb'}`
+          }}>
             <div style={metricHeader}>
               <span style={metricIcon}>📈</span>
               <h2 style={metricTitle}>Total Income</h2>
@@ -206,7 +225,11 @@ export default function App() {
             <div style={metricFooter}>Last 30 days</div>
           </div>
 
-          <div style={{ ...metricCard, background: darkMode ? 'linear-gradient(180deg, rgba(29,36,66,0.85), rgba(29,36,66,0.75))' : metricCard.background, border: darkMode ? '1px solid rgba(255,255,255,0.06)' : metricCard.border }}>
+          <div style={{
+            ...metricCard,
+            background: darkMode ? '#0f172a' : '#ffffff',
+            border: `1px solid ${darkMode ? '#1f2937' : '#e5e7eb'}`
+          }}>
             <div style={metricHeader}>
               <span style={metricIcon}>💸</span>
               <h2 style={metricTitle}>Total Expenses</h2>
@@ -215,7 +238,11 @@ export default function App() {
             <div style={metricFooter}>Last 30 days</div>
           </div>
 
-          <div style={{ ...metricCard, background: darkMode ? 'linear-gradient(180deg, rgba(29,36,66,0.85), rgba(29,36,66,0.75))' : metricCard.background, border: darkMode ? '1px solid rgba(255,255,255,0.06)' : metricCard.border }}>
+          <div style={{
+            ...metricCard,
+            background: darkMode ? '#0f172a' : '#ffffff',
+            border: `1px solid ${darkMode ? '#1f2937' : '#e5e7eb'}`
+          }}>
             <div style={metricHeader}>
               <span style={metricIcon}>💼</span>
               <h2 style={metricTitle}>Net Savings</h2>
@@ -226,7 +253,11 @@ export default function App() {
         </div>
 
         <div style={grid2}>
-          <div style={{ ...cardStyle, background: darkMode ? '#151a2e' : cardStyle.background, border: darkMode ? '1px solid #232a44' : cardStyle.border }}>
+          <div style={{
+            ...cardStyle,
+            background: darkMode ? '#0f172a' : '#ffffff',
+            border: `1px solid ${darkMode ? '#1f2937' : '#e5e7eb'}`
+          }}>
             <h2 style={h2Style}>➕ Add Transaction</h2>
             <div className="form-group" style={fgStyle}>
               <label style={labelField}>Date</label>
@@ -258,7 +289,11 @@ export default function App() {
             </button>
           </div>
 
-          <div style={{ ...cardStyle, background: darkMode ? '#151a2e' : cardStyle.background, border: darkMode ? '1px solid #232a44' : cardStyle.border }}>
+          <div style={{
+            ...cardStyle,
+            background: darkMode ? '#0f172a' : '#ffffff',
+            border: `1px solid ${darkMode ? '#1f2937' : '#e5e7eb'}`
+          }}>
             <h2 style={h2Style}>📈 Spending by Category</h2>
             <div className="chart-container" style={chartWrap}>
               <canvas id="categoryChart"></canvas>
@@ -267,7 +302,11 @@ export default function App() {
           </div>
         </div>
 
-        <div style={{ ...cardStyle, background: darkMode ? '#151a2e' : cardStyle.background, border: darkMode ? '1px solid #232a44' : cardStyle.border }}>
+        <div style={{
+          ...cardStyle,
+          background: darkMode ? '#0f172a' : '#ffffff',
+          border: `1px solid ${darkMode ? '#1f2937' : '#e5e7eb'}`
+        }}>
           <h2 style={h2Style}>📋 Recent Transactions</h2>
           <div className="transaction-list" style={listWrap}>
             {transactions.length === 0 ? (
